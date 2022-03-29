@@ -78,65 +78,66 @@ except Exception as e:
 while True:
     try:
         # Get if there is a frame, and the frame itself
-        ret, frame = vc.read()
-        if ret == True:
-            # Downscale to smaller frame to work with
-            resized = cv2.resize(frame, (scaled_width, scaled_height))
-            # Black out original frame. Now black canvas for us to put
-            # characters on.
-            cv2.rectangle(frame, (0, 0), (width, height), (0, 0, 0), -1)
-                
-            # Iterate through every one of these scaled pixels
-            for col in range(scaled_height):
-                for row in range(scaled_width):
-                    # Extract tje colors for that pixel
-                    red = min(255, resized[col, row, 2] * BRIGHTNESS_MULTIPLIER * COLOR_DESAT)
-                    green = min(255, resized[col, row, 1] * BRIGHTNESS_MULTIPLIER)
-                    blue = min(255, resized[col, row, 0] * BRIGHTNESS_MULTIPLIER * COLOR_DESAT)
-                    # We need to map the average color density onto our character density map.
-                    avg =  int((red + green + blue) / (255*3) * 255 )
-                    avg_percent = int(avg / 255 * (len(DENSITY)-1))
-                    text = str(DENSITY[avg_percent])
-                    # Now we have the character, lets put it on the frame
-                    cv2.putText(frame, text, 
-                        (int(row*scalar), int(col*scalar)), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 
-                        0.5 if not SMOL_PC_WEAKLING_MODE else 0.75,
-                        (int(blue), int(green), int(red)),
-                        1 if not SMOL_PC_WEAKLING_MODE else 2,
-                        1)
-
-            if SCREEN_COMMENT:
-                # We want to put a comment on the screen.
-                # TODO: The position needs to be centered    
-                cv2.rectangle(frame, (0, height), (width, int(950/1080*height)), (0, 0, 0), -1)
-                cv2.putText(frame, "NOTE: Virtual Victor does not understand work stuff.", 
-                            (int(110/1920*width), int(1020/1080*height)), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 
-                            2 if width == 1920 else 1,
-                            (int(16), int(118), int(18)),
-                            2 if width == 1920 else 1,
-                            1)
-
-            if MIRROR_CAMERA:
-                # Flip the frame
-                frame = cv2.flip(frame, 1)
-
-            if OUTPUT_LOCAL:
-                # Display in window.
-                cv2.imshow('Frame', frame)
-
-            if OUTPUT_VIRTUAL:
-                # Send to virtual camera
-                cam.send(frame)
-                cam.sleep_until_next_frame()
-
-            if cv2.waitKey(25) & 0xFF == ord('q'):
-                # If we press `q`, close the program
-                break
-        else:
+        success, frame = vc.read()
+        if not success:
             # We could not get a frame for some reason.
             continue
+
+        # Downscale to smaller frame to work with
+        resized = cv2.resize(frame, (scaled_width, scaled_height))
+        # Black out original frame. Now black canvas for us to put
+        # characters on.
+        cv2.rectangle(frame, (0, 0), (width, height), (0, 0, 0), -1)
+                
+        # Iterate through every one of these scaled pixels
+        for col in range(scaled_height):
+            for row in range(scaled_width):
+                # Extract tje colors for that pixel
+                red = min(255, resized[col, row, 2] * BRIGHTNESS_MULTIPLIER * COLOR_DESAT)
+                green = min(255, resized[col, row, 1] * BRIGHTNESS_MULTIPLIER)
+                blue = min(255, resized[col, row, 0] * BRIGHTNESS_MULTIPLIER * COLOR_DESAT)
+                # We need to map the average color density onto our character density map.
+                avg =  int((red + green + blue) / (255*3) * 255 )
+                avg_percent = int(avg / 255 * (len(DENSITY)-1))
+                text = str(DENSITY[avg_percent])
+                # Now we have the character, lets put it on the frame
+                cv2.putText(frame, text, 
+                    (int(row*scalar), int(col*scalar)), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 
+                    0.5 if not SMOL_PC_WEAKLING_MODE else 0.75,
+                    (int(blue), int(green), int(red)),
+                    1 if not SMOL_PC_WEAKLING_MODE else 2,
+                    1)
+
+        if SCREEN_COMMENT:
+            # We want to put a comment on the screen.
+            # TODO: The position needs to be centered    
+            cv2.rectangle(frame, (0, height), (width, int(950/1080*height)), (0, 0, 0), -1)
+            cv2.putText(frame, SCREEN_COMMENT, 
+                        (int(110/1920*width), int(1020/1080*height)), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 
+                        2 if width == 1920 else 1,
+                        (int(16), int(118), int(18)),
+                        2 if width == 1920 else 1,
+                        1)
+
+        if MIRROR_CAMERA:
+            # Flip the frame
+            frame = cv2.flip(frame, 1)
+
+        if OUTPUT_LOCAL:
+            # Display in window.
+            cv2.imshow('Frame', frame)
+
+        if OUTPUT_VIRTUAL:
+            # Send to virtual camera
+            cam.send(frame)
+            cam.sleep_until_next_frame()
+
+        if cv2.waitKey(25) & 0xFF == ord('q'):
+            # If we press `q`, close the program
+            break
+
     except KeyboardInterrupt:
         # We stopped this in console with Ctrl+C
         break
