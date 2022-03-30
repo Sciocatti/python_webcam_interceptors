@@ -129,6 +129,7 @@ dmypy.json
 .pyre/
 
 # Virtual environments
+/baseline/baseline_venv/
 /ascii_cam/ascii_cam_venv/
 /stickmania/stickmania_venv/
 /live_translator/live_translator_venv/
