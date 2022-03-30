@@ -11,7 +11,8 @@ MIRROR_CAMERA = False
 # The character density map. From left to right each
 # character fills more space, so appears more dense.
 DENSITY = "@@#W$9876543210?!abc;:+=-,._ "
-# If True, enables the cirtual camera.
+
+# If True, enables the virtual camera.
 # ! NOTE: Requires something like OBS virtualcam to be
 # ! NOTE: on the system. 
 OUTPUT_VIRTUAL = True
